@@ -1,5 +1,5 @@
 # 使用构建参数指定基础镜像
-ARG BASE_IMAGE=openclaw/openclaw:latest
+ARG BASE_IMAGE=ghcr.io/openclaw/openclaw:latest
 FROM ${BASE_IMAGE}
 
 USER root
