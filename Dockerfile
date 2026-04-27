@@ -42,4 +42,10 @@ RUN npm config set registry https://registry.npmmirror.com/
 
 ENV PATH="$PATH:/root/.openclaw/extensions/node_modules/.bin"
 
+COPY root-init.sh /usr/local/bin/root-init.sh
+
+WORKDIR /root
+
 # RUN mkdir test && cd test && echo hello > test.md && qmd status && qmd collection add . --name test && qmd embed && qmd query "hello"
+
+ENTRYPOINT ["/bin/bash", "/usr/local/bin/root-init.sh"]
