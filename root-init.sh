@@ -39,6 +39,7 @@ wait_for_gateway() {
 
 main() {
     log_section "OpenClaw start"
+    ln -s /root/.config $OPENCLAW_HOME/.config
     start_gateway
     wait_for_gateway
 }
