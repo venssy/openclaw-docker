@@ -56,9 +56,9 @@ install_agent_reach() {
         pip_index_env="export PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple"
     fi
 
-    if gosu node test -f /root/.agent-reach-venv/bin/agent-reach; then
+    if test -f /root/.agent-reach-venv/bin/agent-reach; then
         local check_output
-        check_output="$(gosu node bash -c "
+        check_output="$(bash -c "
             export PATH=\$PATH:/root/.local/bin
             $pip_index_env
             if [ -f ~/.agent-reach-venv/bin/activate ]; then
@@ -74,7 +74,7 @@ install_agent_reach() {
         fi
 
         echo "Agent Reach 检测到可更新版本，开始自动更新..."
-        gosu node bash -c "
+        bash -c "
             export PATH=\$PATH:/root/.local/bin
             $pip_index_env
             if [ -f ~/.agent-reach-venv/bin/activate ]; then
@@ -84,7 +84,7 @@ install_agent_reach() {
             pip install --upgrade $github_url $pip_mirror
         "
     else
-        gosu node bash -c "
+        bash -c "
             export PATH=\$PATH:/root/.local/bin
             $pip_index_env
             if [ ! -d ~/.agent-reach-venv ]; then
@@ -97,7 +97,7 @@ install_agent_reach() {
         "
     fi
 
-    gosu node bash -c "
+    bash -c "
         export PATH=\$PATH:/root/.local/bin
         $pip_index_env
         if [ -f ~/.agent-reach-venv/bin/activate ]; then
@@ -148,7 +148,7 @@ install_agent_reach() {
 start_gateway() {
     log_section "启动 OpenClaw Gateway"
 
-    gosu node env HOME=/root DBUS_SESSION_BUS_ADDRESS=/dev/null \
+    env HOME=/root DBUS_SESSION_BUS_ADDRESS=/dev/null \
         BUN_INSTALL="/usr/local" AGENT_REACH_HOME="/root/.agent-reach" AGENT_REACH_VENV_HOME="/root/.agent-reach-venv" \
         PATH="/root/.agent-reach-venv/bin:/usr/local/bin:$PATH" \
         openclaw gateway run \
