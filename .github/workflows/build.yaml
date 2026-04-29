@@ -84,8 +84,8 @@ jobs:
             .
 
           # 移动缓存文件（避免缓存过大）
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          # rm -rf /tmp/.buildx-cache
+          # mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
           echo "New image built and pushed with tag ${{ env.TARGET_TAG }}"
 
