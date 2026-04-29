@@ -7,9 +7,6 @@ on:
   push:                     # 新增：代码推送时触发
     branches:
       - main               # 监听 main 分支的推送
-    paths:                  # 仅监听以下文件变更
-      - 'Dockerfile'
-      - '.github/workflows/*.yml'
 
 env:
   REGISTRY: "registry.cn-hangzhou.aliyuncs.com"  # 阿里云 ACR 地址
@@ -54,9 +51,6 @@ jobs:
       # 缓存 Docker 构建层（BuildKit 缓存）
       - name: Cache Docker layers
         uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: build
       
       - name: Set up Docker Buildx
         id: buildx
@@ -84,8 +78,8 @@ jobs:
           docker buildx build \
             --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TARGET_TAG }} \
             --build-arg BASE_IMAGE=${{ env.BASE_IMAGE }} \
-            --cache-from "type=local,src=/tmp/.buildx-cache" \
-            --cache-to "type=local,dest=/tmp/.buildx-cache-new" \
+            --cache-from "type=gha" \
+            --cache-to "type=gha,mode=max" \
             --push \
             .
 
