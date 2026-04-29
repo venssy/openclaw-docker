@@ -56,10 +56,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfile') }}  # 替换为你的依赖文件
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
+      
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
