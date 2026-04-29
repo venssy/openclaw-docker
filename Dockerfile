@@ -3,6 +3,7 @@ ARG BASE_IMAGE=ghcr.io/openclaw/openclaw:latest
 FROM ${BASE_IMAGE}
 
 USER root
+ENV HOME=/root
 
 RUN apt update && apt install -y --no-install-recommends \
     git curl ca-certificates gnupg2 python3 python3-pip cmake g++ && \
@@ -23,6 +24,9 @@ ENV LD_LIBRARY_PATH="/usr/local/cuda-13/lib64:$PATH"
 #    git clone https://github.com/tobi/qmd.git /qmd && cd /qmd && \
 #    bun install && bun run build -- --cuda && \
 #    rm -rf /qmd
+
+RUN mv /home/node/.linuxbrew /root/
+# && ln -s /root/.linuxbrew/Homebrew/bin/brew /root/.linuxbrew/bin/brew
 
 # ENV NODE_LLAMA_CPP_GPU=false
 
