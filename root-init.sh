@@ -170,7 +170,7 @@ wait_for_gateway() {
 
 main() {
     log_section "OpenClaw start"
-    # ln -s $OPENCLAW_HOME/.config /root/.config
+    mount --bind $OPENCLAW_HOME/.config /root/.config
     
     setup_runtime_env
     install_agent_reach
