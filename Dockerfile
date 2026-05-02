@@ -1,3 +1,4 @@
+FROM ghcr.io/astral-sh/uv:0.11.6-python3.13-trixie@sha256:b3c543b6c4f23a5f2df22866bd7857e5d304b67a564f4feab6ac22044dde719b AS uv_source
 FROM node:22-alpine AS clawpanel-builder
 
 # 安装构建依赖
@@ -25,6 +26,7 @@ RUN npm ci --prefer-offline --registry https://registry.npmmirror.com && \
 FROM node:22-slim
 
 COPY --from=python:3.12-slim-bookworm /usr/local /usr/local
+COPY --chmod=0755 --from=uv_source /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/
 
 WORKDIR /root
 ENV HOME=/root
@@ -41,7 +43,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     bash ca-certificates chromium curl docker.io build-essential ffmpeg \
     fonts-liberation fonts-noto-cjk fonts-noto-color-emoji git jq locales \
-    openssh-client procps socat tini unzip gnupg2 tmux && \
+    openssh-client procps socat tini unzip gnupg2 tmux \
+    ripgrep ffmpeg gcc libffi-dev procps && \
     # 添加CUDA源
     curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/3bf863cc.pub | gpg --dearmor -o /usr/share/keyrings/nvidia-cuda-keyring.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/nvidia-cuda-keyring.gpg] https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/ /" > /etc/apt/sources.list.d/cuda.list && \
@@ -95,6 +98,65 @@ COPY --from=clawpanel-builder /build/dist ./dist
 COPY --from=clawpanel-builder /build/scripts ./scripts
 COPY --from=clawpanel-builder /build/package*.json ./
 COPY --from=clawpanel-builder /build/node_modules ./node_modules
+
+
+RUN git clone https://github.com/NousResearch/hermes-agent /opt/hermes
+
+WORKDIR /opt/hermes
+
+# ---------- Layer-cached dependency install ----------
+# Copy only package manifests first so npm install + Playwright are cached
+# unless the lockfiles themselves change.
+#
+# ui-tui/packages/hermes-ink/ is copied IN FULL (not just its manifests)
+# because it is referenced as a `file:` workspace dependency from
+# ui-tui/package.json.  Copying the tree up front lets npm resolve the
+# workspace to real content instead of stopping at a bare package.json.
+# COPY package.json package-lock.json ./
+# COPY web/package.json web/package-lock.json web/
+# COPY ui-tui/package.json ui-tui/package-lock.json ui-tui/
+# COPY ui-tui/packages/hermes-ink/ ui-tui/packages/hermes-ink/
+
+# `npm_config_install_links=false` forces npm to install `file:` deps as
+# symlinks (the npm 10+ default) even on Debian's older bundled npm 9.x,
+# which defaults to `install-links=true` and installs file deps as *copies*.
+# The host-side package-lock.json is generated with a newer npm that uses
+# symlinks, so an install-as-copy produces a hidden node_modules/.package-lock.json
+# that permanently disagrees with the root lock on the @hermes/ink entry.
+# That disagreement trips the TUI launcher's `_tui_need_npm_install()`
+# check on every startup and triggers a runtime `npm install` that then
+# fails with EACCES (node_modules/ is root-owned from build time).
+ENV npm_config_install_links=false
+
+RUN npm install --prefer-offline --no-audit && \
+    # npx playwright install --with-deps chromium --only-shell && \
+    # (cd web && npm install --prefer-offline --no-audit) && \
+    (cd ui-tui && npm install --prefer-offline --no-audit) && npm run build && \
+    npm cache clean --force
+
+# ---------- Source code ----------
+# .dockerignore excludes node_modules, so the installs above survive.
+# COPY --chown=hermes:hermes . .
+
+# Build browser dashboard and terminal UI assets.
+# RUN cd web && npm run build && \
+# RUN cd ui-tui && npm run build
+
+# ---------- Permissions ----------
+# Make install dir world-readable so any HERMES_UID can read it at runtime.
+# The venv needs to be traversable too.
+
+RUN chmod -R a+rX /opt/hermes
+# Start as root so the entrypoint can usermod/groupmod + gosu.
+# If HERMES_UID is unset, the entrypoint drops to the default hermes user (10000).
+
+# ---------- Python virtualenv ----------
+RUN uv venv && \
+    uv pip install --no-cache-dir -e ".[all]"
+    
+ENV HERMES_HOME=/root/.hermes
+ENV PATH="/root/.hermes/.local/bin:${PATH}"
+
 
 WORKDIR /root
 
