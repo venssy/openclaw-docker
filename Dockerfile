@@ -1,3 +1,27 @@
+FROM node:22-slim AS clawpanel-builder
+
+# 安装构建依赖
+RUN apk add --no-cache \
+    git \
+    python3 \
+    make \
+    g++
+
+RUN git clone https://github.com/qingchencloud/clawpanel /tmp/clawpanel
+
+WORKDIR /build
+
+# 复制项目文件
+RUN cp /tmp/clawpanel/package*.json ./
+RUN cp /tmp/clawpanel/vite.config.js ./
+RUN cp /tmp/clawpanel/index.html ./
+RUN cp -r /tmp/clawpanel/scripts/ ./scripts/
+RUN cp -r /tmp/clawpanel/src/ ./src/
+
+# 安装依赖并构建
+RUN npm ci --prefer-offline --registry https://registry.npmmirror.com && \
+    npm run build
+
 FROM node:22-slim
 
 COPY --from=python:3.12-slim-bookworm /usr/local /usr/local
@@ -64,6 +88,15 @@ RUN mkdir -p /root/.linuxbrew/Homebrew && \
     ln -s /root/.linuxbrew/Homebrew/bin/brew /root/.linuxbrew/bin/brew && \
     chmod -R g+rwX /root/.linuxbrew
 
+WORKDIR /clawpanel
+
+# 复制clawpanel
+COPY --from=builder /build/dist ./dist
+COPY --from=builder /build/scripts ./scripts
+COPY --from=builder /build/package*.json ./
+COPY --from=builder /build/node_modules ./node_modules
+
+WORKDIR /root
 
 COPY ./init.sh /usr/local/bin/init.sh
 RUN sed -i 's/\r$//' /usr/local/bin/init.sh && \

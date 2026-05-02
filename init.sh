@@ -168,14 +168,29 @@ wait_for_gateway() {
     exit "$exit_code"
 }
 
+start_clawpanel() {
+  cd /clawpanel && node scripts/serve.js &
+  cd /root
+}
+
+
 main() {
     log_section "OpenClaw start"
-    mount --bind $OPENCLAW_HOME/.config /root/.config
-    
+
+    for dr in ".config" ".tmux"; do
+        if [ -d "/root/$dr" ]; then
+          mv "/root/$dr" "/root/$dr".bak
+        fi
+
+        ln -s $OPENCLAW_HOME/$dr /root/$dr
+    done
+
     setup_runtime_env
     install_agent_reach
     
     start_gateway
+    start_clawpanel
+
     wait_for_gateway
 }
 
