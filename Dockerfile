@@ -1,4 +1,4 @@
-FROM node:22-slim AS clawpanel-builder
+FROM node:22-alpine AS clawpanel-builder
 
 # 安装构建依赖
 RUN apk add --no-cache \
