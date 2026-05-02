@@ -91,10 +91,10 @@ RUN mkdir -p /root/.linuxbrew/Homebrew && \
 WORKDIR /clawpanel
 
 # 复制clawpanel
-COPY --from=builder /build/dist ./dist
-COPY --from=builder /build/scripts ./scripts
-COPY --from=builder /build/package*.json ./
-COPY --from=builder /build/node_modules ./node_modules
+COPY --from=clawpanel-builder /build/dist ./dist
+COPY --from=clawpanel-builder /build/scripts ./scripts
+COPY --from=clawpanel-builder /build/package*.json ./
+COPY --from=clawpanel-builder /build/node_modules ./node_modules
 
 WORKDIR /root
 
