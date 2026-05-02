@@ -10,9 +10,9 @@ on:
 
 env:
   REGISTRY: "registry.cn-hangzhou.aliyuncs.com"  # 阿里云 ACR 地址
-  IMAGE_NAME: venssy/openclaw
+  IMAGE_NAME: venssy/clawpanel-openclaw-hermes
   BASE_IMAGE: justlikemaki/openclaw-docker-cn-im:latest
-  TARGET_TAG: official
+  TARGET_TAG: latest
 
 jobs:
   check-and-build:
