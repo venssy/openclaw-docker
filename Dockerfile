@@ -155,7 +155,7 @@ RUN uv venv && \
     uv pip install --no-cache-dir -e ".[all]"
     
 ENV HERMES_HOME=/root/.hermes
-ENV PATH="/root/.hermes/.local/bin:${PATH}"
+ENV PATH="/root/.hermes/.local/bin:${PATH}:/opt/hermes/.venv/bin"
 
 
 WORKDIR /root
