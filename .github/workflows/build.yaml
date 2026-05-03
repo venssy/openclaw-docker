@@ -36,33 +36,12 @@ jobs:
       # 设置 Docker Buildx 以支持多平台构建
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Compare digests and build if changed
-        if: ${{ github.event_name == 'push' || env.PREVIOUS_DIGEST == 'none' || env.CURRENT_DIGEST != env.PREVIOUS_DIGEST }}
-        run: |
-          # 保存当前摘要供下次使用
-          echo "${{ env.CURRENT_DIGEST }}" > .base-image-digest
-          
-          # 构建新镜像V1
-          # docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TARGET_TAG }} \
-          #   --build-arg BASE_IMAGE=${{ env.BASE_IMAGE }} \
-          #   .
-
-          # 推送新镜像V1
-          # docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TARGET_TAG }}
-
-          # 构建镜像（使用 BuildKit 缓存）
-          docker buildx build \
-            --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TARGET_TAG }} \
-            --build-arg BASE_IMAGE=${{ env.BASE_IMAGE }} \
-            --cache-from "type=gha" \
-            --cache-to "type=gha,mode=max" \
-            --push \
-            .
-
-          # 移动缓存文件（避免缓存过大）
-          # rm -rf /tmp/.buildx-cache
-          # mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-          echo "New image built and pushed with tag ${{ env.TARGET_TAG }}"
-
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          push: ${{ github.event_name != 'pull_request' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
