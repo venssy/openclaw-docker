@@ -18,6 +18,7 @@ RUN cp /tmp/clawpanel/vite.config.js ./
 RUN cp /tmp/clawpanel/index.html ./
 RUN cp -r /tmp/clawpanel/scripts/ ./scripts/
 RUN cp -r /tmp/clawpanel/src/ ./src/
+RUN cp -r /tmp/clawpanel/public/ ./public/
 
 # 安装依赖并构建
 RUN npm ci --prefer-offline --registry https://registry.npmmirror.com && \
@@ -98,7 +99,7 @@ COPY --from=clawpanel-builder /build/dist ./dist
 COPY --from=clawpanel-builder /build/scripts ./scripts
 COPY --from=clawpanel-builder /build/package*.json ./
 COPY --from=clawpanel-builder /build/node_modules ./node_modules
-
+COPY --from=clawpanel-builder /build/public ./public
 
 RUN git clone https://github.com/NousResearch/hermes-agent /opt/hermes
 
