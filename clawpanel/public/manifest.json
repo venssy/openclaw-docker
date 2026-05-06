@@ -1,0 +1,12 @@
+{
+    "short_name": "ClawPl",
+    "name": "ClawPanel",
+    "icon": [
+        {
+            "src": "icon.png",
+            "type": "image/png",
+            "sizes": "48x48"
+        }
+    ],
+    "start_url": "/"
+}
