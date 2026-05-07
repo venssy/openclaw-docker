@@ -19,6 +19,7 @@ RUN cp /tmp/clawpanel/index.html ./
 RUN cp -r /tmp/clawpanel/scripts/ ./scripts/
 RUN cp -r /tmp/clawpanel/src/ ./src/
 RUN cp -r /tmp/clawpanel/public/ ./public/
+RUN sed -i '/<head>/a   <link rel="manifest" href="\/manifest.json">' ./index.html
 
 # 安装依赖并构建
 RUN npm ci --prefer-offline --registry https://registry.npmmirror.com && \
@@ -58,9 +59,19 @@ RUN apt-get update && \
     printf 'LANG=en_US.UTF-8\nLANGUAGE=en_US:en\nLC_ALL=en_US.UTF-8\n' > /etc/default/locale && \
     # 配置 git 使用 HTTPS 替代 SSH
     git config --system url."https://github.com/".insteadOf ssh://git@github.com/ && \
-    
-    # 设置 npm 镜像并安装全局包
-    npm config set registry https://registry.npmmirror.com && \
+
+    # 清理 apt 缓存
+    apt-get purge -y --auto-remove && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /root/.npm /root/.cache
+
+RUN curl -s --no-buffer \
+    -H "Cache-Control: no-cache" \
+    -H "Pragma: no-cache" \
+    https://registry.npmjs.org/openclaw/latest | grep -Po '"version":"[^\"]*"' > /tmp/openclaw-version.txt
+
+# 设置 npm 镜像并安装全局包
+RUN npm config set registry https://registry.npmmirror.com && \
     npm install -g openclaw opencode-ai@latest clawhub playwright playwright-extra \
                    puppeteer-extra-plugin-stealth @steipete/bird \
                    acpx@latest @anthropic-ai/claude-code @openai/codex @openai/codex-sdk && \
@@ -79,9 +90,7 @@ RUN apt-get update && \
     # 安装 Playwright 浏览器依赖
     npx playwright install chromium --with-deps && \
 
-    # 清理 apt 缓存
-    apt-get purge -y --auto-remove && \
-    apt-get clean && \
+    # 清理缓存
     rm -rf /var/lib/apt/lists/* /tmp/* /root/.npm /root/.cache
 
 
@@ -100,6 +109,7 @@ COPY --from=clawpanel-builder /build/scripts ./scripts
 COPY --from=clawpanel-builder /build/package*.json ./
 COPY --from=clawpanel-builder /build/node_modules ./node_modules
 COPY --from=clawpanel-builder /build/public ./public
+COPY clawpanel/public/manifest.json ./public
 
 RUN git clone https://github.com/NousResearch/hermes-agent /opt/hermes
 
