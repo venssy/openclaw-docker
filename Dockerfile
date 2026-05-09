@@ -112,7 +112,10 @@ COPY clawpanel/public/manifest.json ./public
 
 ARG HERMES_COMMIT
 
-RUN git clone https://github.com/NousResearch/hermes-agent /opt/hermes
+RUN git clone https://github.com/NousResearch/hermes-agent /opt/hermes && \
+    cd /opt/hermes && \
+    git fetch --tags && \
+    git checkout $HERMES_COMMIT
 
 WORKDIR /opt/hermes
 
