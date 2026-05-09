@@ -46,8 +46,8 @@ jobs:
         run: |
           # HERMES_COMMIT=$(curl -s https://api.github.com/repos/NousResearch/hermes-agent/commits/main | jq -r '.sha' | cut -c1-8)
           # echo "HERMES_COMMIT=$HERMES_COMMIT" >> $GITHUB_ENV
-          
-          git clone https://github.com/NousResearch/hermes-agent.git .
+
+          git clone https://github.com/NousResearch/hermes-agent.git
           cd hermes-agent
           git fetch --tags  # 获取所有 tags
           LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
