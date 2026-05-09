@@ -8,6 +8,8 @@ RUN apk add --no-cache \
     make \
     g++
 
+ARG CLAWPANEL_COMMIT
+
 RUN git clone https://github.com/qingchencloud/clawpanel /tmp/clawpanel
 
 WORKDIR /build
@@ -65,10 +67,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /root/.npm /root/.cache
 
-RUN curl -s --no-buffer \
-    -H "Cache-Control: no-cache" \
-    -H "Pragma: no-cache" \
-    https://registry.npmjs.org/openclaw/latest | grep -Po '"version":"[^\"]*"' > /tmp/openclaw-version.txt
+ARG OPENCLAW_VERSION
 
 # 设置 npm 镜像并安装全局包
 RUN npm config set registry https://registry.npmmirror.com && \
@@ -110,6 +109,8 @@ COPY --from=clawpanel-builder /build/package*.json ./
 COPY --from=clawpanel-builder /build/node_modules ./node_modules
 COPY --from=clawpanel-builder /build/public ./public
 COPY clawpanel/public/manifest.json ./public
+
+ARG HERMES_COMMIT
 
 RUN git clone https://github.com/NousResearch/hermes-agent /opt/hermes
 

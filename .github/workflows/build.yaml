@@ -33,6 +33,27 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
+      # 获取 clawpanel 仓库的最新 commit
+      - name: Get latest commit from clawpanel repo
+        id: clawpanel-commit
+        run: |
+          CLAWPANEL_COMMIT=$(curl -s https://api.github.com/repos/qingchencloud/clawpanel/commits/main | jq -r '.sha' | cut -c1-8)
+          echo "CLAWPANEL_COMMIT=$CLAWPANEL_COMMIT" >> $GITHUB_ENV
+
+      # 获取 hermes-agent 仓库的最新 commit
+      - name: Get latest commit from hermes-agent repo
+        id: hermes-commit
+        run: |
+          HERMES_COMMIT=$(curl -s https://api.github.com/repos/NousResearch/hermes-agent/commits/main | jq -r '.sha' | cut -c1-8)
+          echo "HERMES_COMMIT=$HERMES_COMMIT" >> $GITHUB_ENV
+
+      # 获取 npm openclaw 包的最新版本
+      - name: Get latest version of openclaw npm package
+        id: openclaw-version
+        run: |
+          VERSION=$(curl -s https://registry.npmjs.org/openclaw/latest | jq -r '.version')
+          echo "OPENCLAW_VERSION=$VERSION" >> $GITHUB_ENV
+
       # 设置 Docker Buildx 以支持多平台构建
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -41,6 +62,10 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          build-args: |
+            CLAWPANEL_COMMIT=${{ env.CLAWPANEL_COMMIT }}
+            HERMES_COMMIT=${{ env.HERMES_COMMIT }}
+            OPENCLAW_VERSION=${{ env.OPENCLAW_VERSION }}
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           push: ${{ github.event_name != 'pull_request' }}
           cache-from: type=gha
