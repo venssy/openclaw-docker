@@ -71,7 +71,7 @@ ARG OPENCLAW_VERSION
 
 # 设置 npm 镜像并安装全局包
 RUN npm config set registry https://registry.npmmirror.com && \
-    npm install -g openclaw opencode-ai@latest clawhub playwright playwright-extra \
+    npm install -g --unsafe-perm openclaw opencode-ai@latest clawhub playwright playwright-extra \
                    puppeteer-extra-plugin-stealth @steipete/bird \
                    acpx@latest @anthropic-ai/claude-code @openai/codex @openai/codex-sdk agent-browser && \
     
