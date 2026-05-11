@@ -73,7 +73,7 @@ ARG OPENCLAW_VERSION
 RUN npm config set registry https://registry.npmmirror.com && \
     npm install -g openclaw opencode-ai@latest clawhub playwright playwright-extra \
                    puppeteer-extra-plugin-stealth @steipete/bird \
-                   acpx@latest @anthropic-ai/claude-code @openai/codex @openai/codex-sdk && \
+                   acpx@latest @anthropic-ai/claude-code @openai/codex @openai/codex-sdk agent-browser && \
     
     # 安装 bun、uv 和 qmd
     curl -fsSL https://bun.sh/install | BUN_INSTALL=/usr/local bash && \
