@@ -48,7 +48,7 @@ RUN apt-get update && \
     bash ca-certificates chromium curl docker.io build-essential ffmpeg \
     fonts-liberation fonts-noto-cjk fonts-noto-color-emoji git jq locales \
     openssh-client procps socat tini unzip gnupg2 tmux \
-    ripgrep ffmpeg gcc libffi-dev procps && \
+    ripgrep ffmpeg gcc libffi-dev procps iproute2 iproute2-do lsof && \
     # 添加CUDA源
     curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/3bf863cc.pub | gpg --dearmor -o /usr/share/keyrings/nvidia-cuda-keyring.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/nvidia-cuda-keyring.gpg] https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/ /" > /etc/apt/sources.list.d/cuda.list && \
